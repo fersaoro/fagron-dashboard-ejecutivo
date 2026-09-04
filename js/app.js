@@ -95,10 +95,34 @@
   function fillFilters() {
     const desde = document.getElementById("f-desde");
     const hasta = document.getElementById("f-hasta");
-    desde.min = hasta.min = DATA.dims.fechas[0];
-    desde.max = hasta.max = DATA.dims.fechas[DATA.dims.fechas.length - 1];
-    desde.value = DATA.dims.fechas[0];
-    hasta.value = DATA.dims.fechas[DATA.dims.fechas.length - 1];
+    const dataMin = DATA.dims.fechas[0];
+    const dataMax = DATA.dims.fechas[DATA.dims.fechas.length - 1];
+    desde.min = hasta.min = dataMin;
+    desde.max = hasta.max = dataMax;
+
+    // Rango por defecto: el mes calendario anterior al de HOY (fecha real
+    // del dispositivo), no el ultimo mes con datos. Ej: si hoy es
+    // septiembre, por defecto muestra 1-31 de agosto.
+    const hoy = new Date();
+    const primerDiaMesActual = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    const ultimoDiaMesAnterior = new Date(primerDiaMesActual - 86400000);
+    const primerDiaMesAnterior = new Date(ultimoDiaMesAnterior.getFullYear(), ultimoDiaMesAnterior.getMonth(), 1);
+    const toISO = (d) => d.toISOString().slice(0, 10);
+    let defDesde = toISO(primerDiaMesAnterior);
+    let defHasta = toISO(ultimoDiaMesAnterior);
+    // proteccion: si el mes anterior cae fuera del rango de datos disponibles,
+    // usar el rango completo de datos en su lugar.
+    if (defHasta < dataMin || defDesde > dataMax) {
+      defDesde = dataMin;
+      defHasta = dataMax;
+    } else {
+      if (defDesde < dataMin) defDesde = dataMin;
+      if (defHasta > dataMax) defHasta = dataMax;
+    }
+    desde.value = defDesde;
+    hasta.value = defHasta;
+    state.minDateIdx = lowerBound(DATA.dims.fechas, defDesde);
+    state.maxDateIdx = upperBoundIdx(DATA.dims.fechas, defHasta);
 
     fillSelect("f-zona", DATA.dims.zonas);
     fillSelect("f-linea", DATA.dims.lineas);
