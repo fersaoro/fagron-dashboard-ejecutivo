@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fagron Colombia · Dashboard Ejecutivo de Ventas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div id="loading">
+  <img src="assets/logo.png" alt="Fagron">
+  <div class="spinner"></div>
+  <p style="font-size:13px;color:#9C9E9F;">Cargando datos de ventas…</p>
+</div>
+
+<header class="topbar">
+  <div class="wrap">
+    <div class="topbar__brand">
+      <img src="assets/logo-blanco.png" alt="Fagron">
+      <div class="topbar__titles">
+        <h1>Dashboard Ejecutivo de Ventas</h1>
+        <span>Formulación Magistral · Dermocosméticos · Materias Primas</span>
+      </div>
+    </div>
+    <div class="topbar__meta">
+      Corte oficial: <b id="meta-corte">—</b><br>
+      Datos cargados: <b id="meta-generado">—</b>
+    </div>
+  </div>
+</header>
+
+<nav class="sectionnav">
+  <div class="wrap">
+    <a href="#resumen" class="active">Resumen</a>
+    <a href="#evolucion">Evolución</a>
+    <a href="#cumplimiento">Cumplimiento</a>
+    <a href="#lineas">Líneas</a>
+    <a href="#zonas">Zonas</a>
+    <a href="#clientes">Top clientes</a>
+    <a href="#familias">Top familias</a>
+  </div>
+</nav>
+
+<div class="filterbar">
+  <div class="wrap">
+    <div class="field field--dates">
+      <div>
+        <label for="f-desde">Desde</label>
+        <input type="date" id="f-desde">
+      </div>
+      <span class="sep">→</span>
+      <div>
+        <label for="f-hasta">Hasta</label>
+        <input type="date" id="f-hasta">
+      </div>
+    </div>
+    <div class="field">
+      <label for="f-zona">Zona</label>
+      <select id="f-zona"><option value="">Todas</option></select>
+    </div>
+    <div class="field">
+      <label for="f-linea">Línea</label>
+      <select id="f-linea"><option value="">Todas</option></select>
+    </div>
+    <div class="field">
+      <label for="f-asesor">Asesor</label>
+      <select id="f-asesor"><option value="">Todos</option></select>
+    </div>
+    <button class="btn" id="btn-reset">Limpiar filtros</button>
+    <div class="filter-status" id="filter-status"></div>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <!-- ===================== RESUMEN / KPIs ===================== -->
+  <section id="resumen">
+    <div class="section__head">
+      <div>
+        <h2>Resumen ejecutivo</h2>
+        <span class="badge-static">Cifras oficiales de cuota — no cambian con los filtros de abajo</span>
+      </div>
+      <span class="hint">Facturado, cuota y cumplimiento del mes en curso y del año, tomados directamente del reporte de cuotas.</span>
+    </div>
+    <div class="kpi-grid" id="kpi-grid"></div>
+  </section>
+
+  <!-- ===================== EVOLUCION ===================== -->
+  <section id="evolucion">
+    <div class="section__head">
+      <h2>Evolución de ventas</h2>
+      <span class="hint">Responde a los filtros de periodo, zona, línea y asesor.</span>
+    </div>
+    <div class="hero-card">
+      <div class="hero-card__top">
+        <h3>Facturación en el periodo seleccionado</h3>
+        <div class="chip-toggle" id="chip-agrupacion">
+          <button data-mode="day">Diario</button>
+          <button data-mode="week" class="active">Semanal</button>
+          <button data-mode="month">Mensual</button>
+        </div>
+      </div>
+      <div class="hero-card__stats">
+        <div><div class="k">Total periodo</div><div class="v" id="ev-total">—</div></div>
+        <div><div class="k">Unidades</div><div class="v" id="ev-unidades">—</div></div>
+        <div><div class="k">Transacciones</div><div class="v" id="ev-transacciones">—</div></div>
+        <div><div class="k">Ticket promedio</div><div class="v" id="ev-ticket">—</div></div>
+      </div>
+      <canvas id="chart-evolucion" height="90"></canvas>
+    </div>
+  </section>
+
+  <!-- ===================== CUMPLIMIENTO (REAL GENERAL) ===================== -->
+  <section id="cumplimiento">
+    <div class="section__head">
+      <div>
+        <h2>Cumplimiento de cuota por zona y representante</h2>
+        <span class="badge-static">Del reporte oficial de cuotas — no cambia con los filtros de abajo</span>
+      </div>
+      <span class="hint">Cuota vs. realizado del mes en curso, tal como se registra en el reporte de cuotas.</span>
+    </div>
+    <div class="panel">
+      <div class="table-toolbar">
+        <input class="search-mini" id="rg-search" placeholder="Buscar representante o zona…">
+      </div>
+      <div class="table-scroll">
+        <table id="tabla-real-general">
+          <thead>
+            <tr>
+              <th>Zona</th><th>Representante</th>
+              <th class="num">Cuota</th><th class="num">Realizado</th>
+              <th class="num">Cumplimiento</th><th class="num">Diferencia</th>
+              <th class="num" title="Semana 1 del mes en curso">Sem 1</th>
+              <th class="num" title="Semana 2 del mes en curso">Sem 2</th>
+              <th class="num" title="Semana 3 del mes en curso">Sem 3</th>
+              <th class="num" title="Semana 4 del mes en curso">Sem 4</th>
+              <th class="num" title="Semana 5 del mes en curso">Sem 5</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== LINEAS ===================== -->
+  <section id="lineas">
+    <div class="section__head">
+      <h2>Venta por línea</h2>
+      <span class="hint">Responde a los filtros de periodo, zona, línea y asesor.</span>
+    </div>
+    <div class="grid-2">
+      <div class="panel panel--chart">
+        <h4>Facturación por línea</h4>
+        <canvas id="chart-lineas"></canvas>
+      </div>
+      <div class="panel">
+        <h4>Detalle por línea</h4>
+        <div class="table-scroll">
+          <table id="tabla-lineas">
+            <thead><tr><th>Línea</th><th class="num">Valor</th><th class="num">%</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ZONAS ===================== -->
+  <section id="zonas">
+    <div class="section__head">
+      <h2>Ventas por zona</h2>
+      <span class="hint">Responde a los filtros de periodo, zona, línea y asesor.</span>
+    </div>
+    <div class="grid-2">
+      <div class="panel panel--chart">
+        <h4>Participación por zona</h4>
+        <canvas id="chart-zonas"></canvas>
+      </div>
+      <div class="panel">
+        <h4>Detalle por zona</h4>
+        <div id="zona-cards" class="grid-3 zona-cards-grid" style="gap:12px;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TOP CLIENTES Y FAMILIAS ===================== -->
+  <section id="clientes">
+    <div class="grid-2 grid-2--equal">
+      <div>
+        <div class="section__head">
+          <h2>Top clientes</h2>
+          <span class="hint">Responde a los filtros de periodo, zona, línea y asesor.</span>
+        </div>
+        <div class="panel">
+          <div class="table-toolbar">
+            <input class="search-mini" id="cli-search" placeholder="Buscar cliente…">
+          </div>
+          <div class="table-scroll">
+            <table id="tabla-clientes">
+              <thead><tr><th>#</th><th>Cliente</th><th class="num">Valor</th><th class="num">%</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <button class="btn loadmore" id="cli-more">Ver más clientes</button>
+        </div>
+      </div>
+      <div id="familias">
+        <div class="section__head">
+          <h2>Top familias de producto</h2>
+          <span class="hint">Responde a los filtros de periodo, zona, línea y asesor.</span>
+        </div>
+        <div class="panel">
+          <div class="table-toolbar">
+            <input class="search-mini" id="fam-search" placeholder="Buscar familia…">
+          </div>
+          <div class="table-scroll">
+            <table id="tabla-familias">
+              <thead><tr><th>#</th><th>Familia</th><th class="num">Valor</th><th class="num">%</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <button class="btn loadmore" id="fam-more">Ver más familias</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <img src="assets/logo-blanco.png" alt="Fagron">
+    <small>Dashboard interno · Fagron Colombia S.A.S. · Uso exclusivo de directores, gerentes y equipo comercial</small>
+  </div>
+</footer>
+
+<script src="js/vendor/chart.umd.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
