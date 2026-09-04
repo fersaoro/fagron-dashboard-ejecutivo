@@ -119,25 +119,38 @@ Cuando lo actualices:
 
 ## Supuestos y decisiones tomadas al construir esto (léase antes de operar)
 
-- El filtro "Asesor" usa la columna `ASESOR` del Excel (no
-  `ASESOR REAL (CRECIMIENTOS)`). El filtro "Zona" usa la columna `ZONA`
-  (no `ZONA DE ASESOR REAL`). Si tu equipo necesita las variantes "reales"
-  para atribución de crecimiento, hay que ajustar `build_data.py`
-  (columnas indicadas por número al inicio del archivo).
+- **El filtro "Zona" y "Asesor" significan "zona/asesor del REPRESENTANTE"**
+  (según `CUOTAS 2026`), no la zona de la transacción individual — son dos
+  campos distintos en tu Excel y no siempre coinciden fila por fila. Se
+  eligió esta interpretación para que el Resumen ejecutivo, la tabla de
+  Cumplimiento, Evolución, Líneas, Zonas, Top clientes y Top familias
+  siempre cuadren entre sí bajo el mismo filtro. Línea, Cliente y Familia
+  sí filtran por el campo exacto de esa transacción.
+- **Cuota dinámica por rango de fechas**: la cuota mostrada en el Resumen
+  ejecutivo y en Cumplimiento es la suma de la cuota mensual (de
+  `CUOTAS 2026`) de todos los meses de 2026 que el rango de fechas
+  seleccionado toca — no se prorratea por día. Si seleccionas solo 10 días
+  de un mes, veras la cuota del mes COMPLETO comparada contra solo esos 10
+  días de ventas (el cumplimiento se verá bajo por diseño, no es un error).
+  Si el rango incluye fechas de 2025, esos meses no aportan cuota (no
+  existe ese dato para 2025 en el Excel).
+- **Corregido un error real de datos**: "MARLY PAOLA BOLAÑO SUAREZ" estaba
+  escrita con dos capitalizaciones distintas en `Data 2025-2026`
+  (mayúsculas y tipo título), lo que dividía sus ventas en dos "asesores"
+  diferentes y le restaba ~$96M en el reporte. El script ahora unifica
+  mayúsculas/minúsculas para Asesor y Familia antes de agrupar, evitando
+  que un error de digitación futuro vuelva a partir a alguien en dos.
 - Las columnas Sem 1 a Sem 5 usan la columna `SEMANA` que ya trae
   `Data 2025-2026` (semana 1 = días 1-7 del mes, semana 2 = días 8-14,
-  etc.), sumando `VALORES` por representante (`ASESOR`) dentro del mes en
-  curso. Los totales de zona y el total general son la suma de sus
-  representantes — no vienen de una fórmula del Excel.
+  etc.) y responden al mismo rango de fechas seleccionado (si el rango
+  cubre varios meses, se suman las semanas de todos esos meses).
 - La columna "Gerente" no se muestra en la tabla (para que quepan las 5
   semanas sin scroll horizontal), pero el dato se conserva internamente.
 - En la hoja `CUOTAS 2026`, las filas "VENTAS SAC" y "VENTAS EMPLEADOS"
   vienen con ZONA=OTROS, pero en el dashboard se reclasifican a
   ZONA=SAC (a pedido tuyo). Este ajuste está *forzado por nombre* dentro
   de `build_data.py` (diccionario `ZONA_OVERRIDE`) — si esos nombres
-  cambian en el Excel, hay que actualizar ese diccionario. Las filas
-  "OTROS" (NUTRABIOTICS, RAMEDICAS) no tienen gerente asignado, tal como
-  en el Excel original.
+  cambian en el Excel, hay que actualizar ese diccionario.
 - Cuando una celda de cuota o diferencia viene vacía en el Excel (no cero),
   el dashboard muestra "—" o "s/cuota" en vez de inventar un valor de $0.
 

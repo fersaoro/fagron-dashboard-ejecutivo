@@ -69,6 +69,14 @@
       <label for="f-asesor">Asesor</label>
       <select id="f-asesor"><option value="">Todos</option></select>
     </div>
+    <div class="field">
+      <label for="f-cliente">Cliente</label>
+      <select id="f-cliente"><option value="">Todos</option></select>
+    </div>
+    <div class="field">
+      <label for="f-familia">Familia</label>
+      <select id="f-familia"><option value="">Todas</option></select>
+    </div>
     <button class="btn" id="btn-reset">Limpiar filtros</button>
     <div class="filter-status" id="filter-status"></div>
   </div>
@@ -79,11 +87,8 @@
   <!-- ===================== RESUMEN / KPIs ===================== -->
   <section id="resumen">
     <div class="section__head">
-      <div>
-        <h2>Resumen ejecutivo</h2>
-        <span class="badge-static">Cifras oficiales de cuota — no cambian con los filtros de abajo</span>
-      </div>
-      <span class="hint">Facturado, cuota y cumplimiento del mes en curso y del año, tomados directamente del reporte de cuotas.</span>
+      <h2>Resumen ejecutivo</h2>
+      <span class="hint">Facturado, cuota y cumplimiento — responde a todos los filtros de abajo (fecha, zona, línea, asesor, cliente, familia).</span>
     </div>
     <div class="kpi-grid" id="kpi-grid"></div>
   </section>
@@ -92,22 +97,29 @@
   <section id="evolucion">
     <div class="section__head">
       <h2>Evolución de ventas</h2>
-      <span class="hint">Responde a los filtros de periodo, zona, línea y asesor.</span>
+      <span class="hint periodo-inline" id="periodo-evolucion"></span>
     </div>
     <div class="hero-card">
       <div class="hero-card__top">
-        <h3>Facturación en el periodo seleccionado</h3>
+        <h3 id="ev-titulo">Facturación</h3>
         <div class="chip-toggle" id="chip-agrupacion">
           <button data-mode="day">Diario</button>
           <button data-mode="week" class="active">Semanal</button>
           <button data-mode="month">Mensual</button>
+          <button data-mode="year">Anual</button>
         </div>
       </div>
       <div class="hero-card__stats">
         <div><div class="k">Total periodo</div><div class="v" id="ev-total">—</div></div>
-        <div><div class="k">Unidades</div><div class="v" id="ev-unidades">—</div></div>
-        <div><div class="k">Transacciones</div><div class="v" id="ev-transacciones">—</div></div>
-        <div><div class="k">Ticket promedio</div><div class="v" id="ev-ticket">—</div></div>
+        <div><button type="button" class="stat-toggle" id="tog-unidades" data-serie="unidades"><span class="k">Unidades</span></button><div class="v" id="ev-unidades">—</div></div>
+        <div><button type="button" class="stat-toggle" id="tog-transacciones" data-serie="transacciones"><span class="k">Transacciones</span></button><div class="v" id="ev-transacciones">—</div></div>
+        <div><button type="button" class="stat-toggle" id="tog-ticket" data-serie="ticket"><span class="k">Ticket promedio</span></button><div class="v" id="ev-ticket">—</div></div>
+        <div class="evol-legend" id="evol-legend">
+          <button type="button" class="evol-legend__chip is-on" id="leg-facturacion" data-serie="facturacion"><i style="background:#E43733"></i>Facturación</button>
+          <button type="button" class="evol-legend__chip" id="leg-unidades" data-serie="unidades"><i style="background:#1E8A5F"></i>Unidades</button>
+          <button type="button" class="evol-legend__chip" id="leg-transacciones" data-serie="transacciones"><i style="background:#F2A93B"></i>Transacciones</button>
+          <button type="button" class="evol-legend__chip" id="leg-ticket" data-serie="ticket"><i style="background:#3E8FD6"></i>Ticket promedio</button>
+        </div>
       </div>
       <canvas id="chart-evolucion" height="90"></canvas>
     </div>
@@ -116,15 +128,13 @@
   <!-- ===================== CUMPLIMIENTO (REAL GENERAL) ===================== -->
   <section id="cumplimiento">
     <div class="section__head">
-      <div>
-        <h2>Cumplimiento de cuota por zona y representante</h2>
-        <span class="badge-static">Del reporte oficial de cuotas — no cambia con los filtros de abajo</span>
-      </div>
-      <span class="hint">Cuota vs. realizado del mes en curso, tal como se registra en el reporte de cuotas.</span>
+      <h2>Cumplimiento de cuota por zona y representante</h2>
+      <span class="hint">Cuota del mes(es) seleccionados vs. ventas reales del periodo — responde a todos los filtros.</span>
     </div>
     <div class="panel">
       <div class="table-toolbar">
         <input class="search-mini" id="rg-search" placeholder="Buscar representante o zona…">
+        <span class="periodo-inline" id="periodo-cumplimiento"></span>
       </div>
       <div class="table-scroll">
         <table id="tabla-real-general">
@@ -133,11 +143,11 @@
               <th>Zona</th><th>Representante</th>
               <th class="num">Cuota</th><th class="num">Realizado</th>
               <th class="num">Cumplimiento</th><th class="num">Diferencia</th>
-              <th class="num" title="Semana 1 del mes en curso">Sem 1</th>
-              <th class="num" title="Semana 2 del mes en curso">Sem 2</th>
-              <th class="num" title="Semana 3 del mes en curso">Sem 3</th>
-              <th class="num" title="Semana 4 del mes en curso">Sem 4</th>
-              <th class="num" title="Semana 5 del mes en curso">Sem 5</th>
+              <th class="num" title="Semana 1 del periodo seleccionado">Sem 1</th>
+              <th class="num" title="Semana 2 del periodo seleccionado">Sem 2</th>
+              <th class="num" title="Semana 3 del periodo seleccionado">Sem 3</th>
+              <th class="num" title="Semana 4 del periodo seleccionado">Sem 4</th>
+              <th class="num" title="Semana 5 del periodo seleccionado">Sem 5</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -149,8 +159,8 @@
   <!-- ===================== LINEAS ===================== -->
   <section id="lineas">
     <div class="section__head">
-      <h2>Venta por línea</h2>
-      <span class="hint">Responde a los filtros de periodo, zona, línea y asesor.</span>
+      <h2>Venta por línea <span class="periodo-inline" id="periodo-lineas"></span></h2>
+      <span class="hint">Responde a todos los filtros.</span>
     </div>
     <div class="grid-2">
       <div class="panel panel--chart">
@@ -172,8 +182,8 @@
   <!-- ===================== ZONAS ===================== -->
   <section id="zonas">
     <div class="section__head">
-      <h2>Ventas por zona</h2>
-      <span class="hint">Responde a los filtros de periodo, zona, línea y asesor.</span>
+      <h2>Ventas por zona <span class="periodo-inline" id="periodo-zonas"></span></h2>
+      <span class="hint">Responde a todos los filtros.</span>
     </div>
     <div class="grid-2">
       <div class="panel panel--chart">
@@ -189,16 +199,17 @@
 
   <!-- ===================== TOP CLIENTES Y FAMILIAS ===================== -->
   <section id="clientes">
+    <span class="hint periodo-inline" id="periodo-clifam" style="display:block;text-align:right;margin-bottom:6px;"></span>
     <div class="grid-2 grid-2--equal">
       <div>
         <div class="section__head">
           <h2>Top clientes</h2>
-          <span class="hint">Responde a los filtros de periodo, zona, línea y asesor.</span>
         </div>
         <div class="panel">
           <div class="table-toolbar">
             <input class="search-mini" id="cli-search" placeholder="Buscar cliente…">
           </div>
+          <p class="cross-filter-note" id="clientes-filtro-nota" style="display:none;">Mostrando solo clientes de la familia seleccionada — clic de nuevo en esa familia para quitar el filtro.</p>
           <div class="table-scroll">
             <table id="tabla-clientes">
               <thead><tr><th>#</th><th>Cliente</th><th class="num">Valor</th><th class="num">%</th></tr></thead>
@@ -211,12 +222,12 @@
       <div id="familias">
         <div class="section__head">
           <h2>Top familias de producto</h2>
-          <span class="hint">Responde a los filtros de periodo, zona, línea y asesor.</span>
         </div>
         <div class="panel">
           <div class="table-toolbar">
             <input class="search-mini" id="fam-search" placeholder="Buscar familia…">
           </div>
+          <p class="cross-filter-note" id="familias-filtro-nota" style="display:none;">Mostrando solo familias del cliente seleccionado — clic de nuevo en ese cliente para quitar el filtro.</p>
           <div class="table-scroll">
             <table id="tabla-familias">
               <thead><tr><th>#</th><th>Familia</th><th class="num">Valor</th><th class="num">%</th></tr></thead>
@@ -230,6 +241,8 @@
   </section>
 
 </main>
+
+<button id="scrollTopBtn" title="Ir arriba" aria-label="Ir arriba">↑</button>
 
 <footer>
   <div class="wrap">
